@@ -33,7 +33,7 @@ node_modules
 .node_repl_history
 
 # Dist and OSX
-dist
+build
 lib
 .DS_Store
 

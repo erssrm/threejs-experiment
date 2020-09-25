@@ -7,8 +7,10 @@
         "emitDecoratorMetadata": true,
         "preserveConstEnums": true,
         "suppressImplicitAnyIndexErrors": true,
-        "outDir": "./dist/",
-        "sourceMap": true
+        "outDir": "build",
+        "rootDir": "src",
+        "sourceMap": true,
+        "declaration": true
     },
     "awesomeTypescriptLoaderOptions": {
         "useWebpackText": true,
@@ -17,7 +19,8 @@
     },
     "exclude": [
         "node_modules",
-        "lib"
+        "lib",
+        "build"
     ],
     "compileOnSave": true,
     "buildOnSave": false,
