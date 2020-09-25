@@ -20,7 +20,8 @@
     "exclude": [
         "node_modules",
         "lib",
-        "build"
+        "build",
+        "public"
     ],
     "compileOnSave": true,
     "buildOnSave": false,

@@ -1,15 +1,16 @@
-const { resolve } = require('path');
+const path = require('path');
 
 const { CheckerPlugin } = require('awesome-typescript-loader');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const TypedocWebpackPlugin = require('typedoc-webpack-plugin');
 
 module.exports = {
   mode: 'development',
   entry: './src/index.ts',
   output: {
     filename: 'bundle.js',
-    path: resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'public'),
   },
 
   resolve: {
@@ -37,16 +38,20 @@ module.exports = {
       },
     ],
   },
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.jsx'],
-  },
   plugins: [
     new CheckerPlugin(),
     new ProgressBarPlugin(),
     new HtmlWebpackPlugin({
-      template: `${__dirname}/src/index.html`,
+      template: `${path.resolve(__dirname, './src/index.html')}`,
       filename: 'index.html',
-      inject: 'body',
+      inject: 'body'
     }),
+    new TypedocWebpackPlugin({
+      out: 'docs',
+      module: 'commonjs',
+      target: 'es6',
+      experimentalDecorators: true,
+      excludeExternals: true
+  }, ['./src']),
   ],
 };
