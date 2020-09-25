@@ -1,31 +1,51 @@
 /** Class based type script Threejs example */
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { SceneSubject } from "./sceneSubjects/SceneSubject";
-import { GeneralLights } from "./sceneSubjects/GeneralLights";
+import { Sphere } from "./sceneSubjects/objects/Sphere";
+import { GeneralLights } from "./sceneSubjects/lights/GeneralLights";
+import { AxesHelper } from "./sceneSubjects/helper/AxesHelper";
+import { Box } from './sceneSubjects/objects/Box';
 
-export class SceneManager {
-  public canvas!: any;
-  constructor(canvas) {
-    this.canvas = canvas
-  }
-  screenDimensions = {
-    width: 500,
-    height: 500,
+export function SceneManager(canvas) {
+  const clock = new THREE.Clock();
+
+  const screenDimensions = {
+    width: canvas.width,
+    height: canvas.height,
   };
-  scene = this.buildScene();
-  renderer = this.buildRender(this.screenDimensions);
-  camera = this.buildCamera(this.screenDimensions);
-  sceneSubjects = this.createSceneSubjects(this.scene);
 
-  setCanvasDimension() {
-    this.screenDimensions = {
-        width: this.canvas.width,
-        height: this.canvas.height,
-      };
+  const scene = buildScene();
+  const renderer = buildRender(screenDimensions);
+  const camera = buildCamera(screenDimensions);
+  const sceneSubjects = createSceneSubjects(scene);
+  const control = addOrbitControl(camera, renderer);
+
+  function addOrbitControl(camera, renderer) {
+    const orbitControl = new OrbitControls(camera, renderer.domElement);
+    return orbitControl;
   }
 
-  public buildCamera({ width, height }) {
+  function buildScene() {
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color("#000");
+
+    return scene;
+  }
+
+  function buildRender({ width, height }) {
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      antialias: true,
+      alpha: true,
+    });
+    const DPR = window.devicePixelRatio ? window.devicePixelRatio : 1;
+    renderer.setPixelRatio(DPR);
+    renderer.setSize(width, height);
+
+    return renderer;
+  }
+
+  function buildCamera({ width, height }) {
     const aspectRatio = width / height;
     const fieldOfView = 60;
     const nearPlane = 1;
@@ -37,58 +57,42 @@ export class SceneManager {
       farPlane
     );
 
+    camera.position.set(0, 0, 30);
+
     return camera;
   }
 
-  public buildRender({ width, height }) {
-    const renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas,
-      antialias: true,
-      alpha: true,
-    });
-    const DPR = window.devicePixelRatio ? window.devicePixelRatio : 1;
-    renderer.setPixelRatio(DPR);
-    renderer.setSize(width, height);
-
-    // renderer.gammaInput = true;
-    // renderer.gammaOutput = true;
-
-    return renderer;
-  }
-
-  public buildScene() {
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color("#000");
-
-    return scene;
-  }
-
-  public createSceneSubjects(scene) {
-    const sceneSubjects = [new GeneralLights(scene), new SceneSubject(scene)];
+  function createSceneSubjects(scene) {
+    const sceneSubjects = [
+      new GeneralLights(scene),
+      new Sphere(scene),
+      new AxesHelper(scene),
+      new Box(scene),
+    ];
 
     return sceneSubjects;
   }
 
-  public update() {
-    const clock = new THREE.Clock();
+  this.update = function () {
     const elapsedTime = clock.getElapsedTime();
+    for (let i = 0; i < sceneSubjects.length; i++) {
+      if (sceneSubjects[i].update) {
+        sceneSubjects[i].update(elapsedTime);
+      }
+    }
+    control.update();
+    renderer.render(scene, camera);
+  };
 
-    for (let i = 0; i < this.sceneSubjects.length; i++)
-      this.sceneSubjects[i].addToScene();
+  this.onWindowResize = function () {
+    const { width, height } = canvas;
 
-    this.renderer.render(this.scene, this.camera);
-  }
+    screenDimensions.width = width;
+    screenDimensions.height = height;
 
-  public onWindowResize = function () {
-    const { width, height } = this.canvas;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
 
-    this.screenDimensions.width = width;
-    this.screenDimensions.height = height;
-
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-
-    this.renderer.setSize(width, height);
-    console.log("this.scene", this.scene);
+    renderer.setSize(width, height);
   };
 }
